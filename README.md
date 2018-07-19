@@ -1,4 +1,4 @@
-# RCNN-Gaze
+# RecurrentGaze
 
 This is the implementation of the ["Recurrent CNN for 3D Gaze Estimation using Appearance and Shape Cues"](https://arxiv.org/abs/1805.03064) paper, accepted for BMVC 2018. Code and trained models will be available soon.
 
