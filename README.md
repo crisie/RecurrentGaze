@@ -4,4 +4,5 @@ This is the implementation of the ["Recurrent CNN for 3D Gaze Estimation using A
 
 
 If you find it useful, please cite the following paper:
+
 Palmero, C., Selva, J., Bagheri, M. A., & Escalera, S. Recurrent CNN for 3D Gaze Estimation using Appearance and Shape Cues. Proc. of British Machine Vision Conference (BMVC), 2018.
