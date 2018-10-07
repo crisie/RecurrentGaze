@@ -473,7 +473,7 @@ class OF4096(ExperimentHelper):
         super().__init__()
         self.name = "OF4096"
         self.description = "Original face, fc 4096D, finetuned VGGFace except last fc"
-        self.weights = exp_utils.OF4096_VGG16_PATH
+        self.weights = exp_utils.OF4096_VGG16
         self.base_model = BaseModel.get_base_model("VGGFace")
         self.model = get_model("face_finetune")
         print(self.name)
@@ -528,7 +528,7 @@ class NF4096(ExperimentHelper):
         super().__init__()
         self.name = "NF4096"
         self.description = "Normalized face, fc 4096D, fcs trained from scratch"
-        self.weights = exp_utils.NF4096_VGG16_PATH
+        self.weights = exp_utils.NF4096_VGG16
         self.base_model = BaseModel.get_base_model("VGGFace")
         self.model = get_model("face_fcscratch")
         print(self.name)
@@ -568,7 +568,7 @@ class NF5632(ExperimentHelper):
         self.name = "NF5632"
         self.description = "Normalized face, fc 5632D, fcs trained from scratch"
         self.fc_dimensions = 5632
-        self.weights = exp_utils.NF5632_VGG16_PATH
+        self.weights = exp_utils.NF5632_VGG16
         self.base_model = BaseModel.get_base_model("VGGFace")
         self.model = get_model("face_fcscratch")
         print(self.name)
@@ -607,7 +607,7 @@ class NE1536(ExperimentHelper):
         super().__init__()
         self.name = "NE1536"
         self.description = "Normalized eyes, fc 1536D, fcs trained from scratch"
-        self.weights = exp_utils.NE1536_VGG16_PATH
+        self.weights = exp_utils.NE1536_VGG16
         self.base_model = BaseModel.get_base_model("VGGFace")
         self.model = get_model("eyes_fcscratch")
         print(self.name)
@@ -654,7 +654,7 @@ class NFL4300(ExperimentHelper):
         self.name = "NFL4300"
         self.description = "Normalized face and landmarks, fc 4300D"
         self.fc_dimensions = 4300
-        self.weights = exp_utils.NFL4300_VGG16_PATH
+        self.weights = exp_utils.NFL4300_VGG16
         self.min_lndmk = exp_utils.NFL4300_MIN_LNMDK
         self.max_lndmk = exp_utils.NFL4300_MAX_LNMDK
         self.base_model = BaseModel.get_base_model("VGGFace")
@@ -729,7 +729,7 @@ class NFE5632(ExperimentHelper):
         self.name = "NFE5632"
         self.description = "Normalized face and eyes, two-stream network, fc 5632D"
         self.fc_dimensions = 5632
-        self.weights = exp_utils.NFE5632_VGG16_PATH
+        self.weights = exp_utils.NFE5632_VGG16
         self.base_model = BaseModel.get_base_model("VGGFace")
         self.model = get_model("two_stream")
         print(self.name)
@@ -778,7 +778,7 @@ class NFEL5836(ExperimentHelper):
         self.name = "NFEL5836"
         self.description = "Normalized face, eyes and landmarks, two-stream + metadata network, fc 5836D"
         self.fc_dimensions = 2918
-        self.weights = exp_utils.NFEL5836_VGG16_PATH
+        self.weights = exp_utils.NFEL5836_VGG16
         self.min_lndmk = exp_utils.NFEL5836_MIN_LNMDK
         self.max_lndmk = exp_utils.NFEL5836_MAX_LNMDK
         self.base_model = BaseModel.get_base_model("VGGFace")
@@ -878,7 +878,7 @@ class NFEL5836GRU(ExperimentHelper):
         self.num_recurrent_layers = 1
         self.num_recurrent_units = 128
         self.look_back = 4
-        self.weights = exp_utils.NFEL5836GRU_VGG16_PATH
+        self.weights = exp_utils.NFEL5836GRU_VGG16
         self.min_lndmk = exp_utils.NFEL5836GRU_MIN_LNMDK
         self.max_lndmk = exp_utils.NFEL5836GRU_MAX_LNMDK
         self.label_pos = -1

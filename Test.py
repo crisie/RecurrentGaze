@@ -251,7 +251,7 @@ if __name__ == '__main__':
     train, validation, variables = experiment.prepare_data(None, validation, variables, False)
 
     print("Initialize data generator...")
-    experiment.init_data_gen_val(validation, batch_size, None, False, False, True)
+    experiment.init_data_gen_val(validation, batch_size, None, False, False) #, True)
 
     print("Loading model and weights...")
     experiment.load_model()

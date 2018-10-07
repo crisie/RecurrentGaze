@@ -211,7 +211,7 @@ class DataGenerator(kerasSequence):
                     ax2.imshow(input_data[0] / 255)
                     ax3.imshow(input_data[1] / 255)
                     ax4.imshow(input_data[2] / 255)
-                    plt.savefig('images/test_NFEL5836/' + str(i) + '_' + str(f) + '_3final.jpg')
+                    plt.savefig('images/test/' + str(i) + '_' + str(f) + '_final.jpg')
                     plt.show()
                     plt.close("all")
 
