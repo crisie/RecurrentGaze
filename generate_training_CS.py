@@ -11,18 +11,17 @@
 #                   Change directories accordingly! See generate_training_FT for more details and comments.
 # python_version  :3.5.5
 # ==============================================================================
+my_path = "F:\\EYEDIAP"
+EYEDIAP_path = "EYEDIAP"
+import os
+import sys
+sys.path.append(os.path.join(my_path, EYEDIAP_path, 'Scripts'))
+from EYEDIAP_misc import *
+
 from EYEDIAP_utils import *
 from data_utils import *
 import numpy as np
-import os
-import sys
-
-my_path = "F:\\EYEDIAP"
-EYEDIAP_path = "EYEDIAP"
-sys.path.append(os.path.join(my_path, EYEDIAP_path, 'Scripts'))
-from EYEDIAP_misc import *
 from data_utils import get_normalized_data, write_vector_to_file
-
 
 
 # Exp 5 refers to the Continuous Screen EYEDIAP subset
@@ -59,7 +58,8 @@ for t in type:
         print("frames_done", frames_done)
         print("Session: ", session)
         # NOTE: this may not work depending on session. Change accordingly.
-        session_str = get_session_string(session_num)
+        #session_str = get_session_string(session_num)
+        session_str = session
 
         # EYEDIAP data path
         head_track_file = os.path.join(my_path, EYEDIAP_path, 'Data', session_str, 'head_pose.txt')
