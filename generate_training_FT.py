@@ -11,18 +11,17 @@
 #                   Change directories accordingly!
 # python_version  :3.5.5
 # ==============================================================================
+my_path = "F:\\EYEDIAP"
+EYEDIAP_path = "EYEDIAP"
+import os
+import sys
+sys.path.append(os.path.join(my_path, EYEDIAP_path, 'Scripts'))
+from EYEDIAP_misc import * # script provided by EYEDIAP
+
 from EYEDIAP_utils import *
 from data_utils import *
 import numpy as np
-import os
-import sys
-
-my_path = "F:\\EYEDIAP"
-EYEDIAP_path = "EYEDIAP"
-sys.path.append(os.path.join(my_path, EYEDIAP_path, 'Scripts'))
-from EYEDIAP_misc import * # script provided by EYEDIAP
 from data_utils import get_normalized_data, write_vector_to_file
-
 
 mod = 'FT'   # target type
 type = ['S', 'M']  # type of head movement
