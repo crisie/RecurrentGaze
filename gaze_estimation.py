@@ -4,7 +4,7 @@ import string
 from skimage.io import imsave
 from Test import *
 imageTuple = namedtuple('DataE', 'file, image')
-
+import tempfile
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
