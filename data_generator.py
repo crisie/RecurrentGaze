@@ -66,6 +66,16 @@ class DataGenerator(kerasSequence):
 
         self.on_epoch_end()
 
+    def update_data(self,
+                    data: list,
+                    labels: list,
+                    feats: list):
+        self.data = data
+        self.labels = labels
+        self.feats = feats
+
+        self.on_epoch_end()
+
     def __len__(self):
         """
         Denotes the number of batches per epoch

@@ -19,6 +19,7 @@ from experiment_helper import *
 from data_utils import *
 from matplotlib import pyplot as plt
 
+
 def init_main():
     parser = argparse.ArgumentParser()
 
@@ -57,59 +58,6 @@ def project_gaze(init_vector, vector, intrinsic_mat):
     return project_points(points_3D, intrinsic_mat)
 
 
-def euler2rot_mat(euler_angles):
-    """
-    Convert euler to rotation matrix, using the XYZ convention R = Rx * Ry * Rz, left-handed positive sign
-    (from Openface)
-    :param euler_angles: euler angles
-    :return: rotation matrix
-    """
-    s1 = np.sin(euler_angles[0])
-    s2 = np.sin(euler_angles[1])
-    s3 = np.sin(euler_angles[2])
-    c1 = np.cos(euler_angles[0])
-    c2 = np.cos(euler_angles[1])
-    c3 = np.cos(euler_angles[2])
-
-    rot_mat = np.empty((3,3), dtype=np.float32)
-    rot_mat[0, 0] = c2 * c3
-    rot_mat[0, 1] = -c2 * s3
-    rot_mat[0, 2] = s2
-    rot_mat[1, 0] = c1 * s3 + c3 * s1 * s2
-    rot_mat[1, 1] = c1 * c3 - s1 * s2 * s3
-    rot_mat[1, 2] = -c2 * s1
-    rot_mat[2, 0] = s1 * s3 - c1 * c3 * s2
-    rot_mat[2, 1] = c3 * s1 + c1 * s2 * s3
-    rot_mat[2, 2] = c1 * c2
-    return np.linalg.inv(rot_mat)
-
-
-def read_calibration_file(file):
-    """
-    Reads the calibration parameters
-    """
-    calib = {}
-    f = open(file, 'r')
-
-    # Read the [resolution] section
-    f.readline().strip()
-    calib['size'] = [int(value) for value in f.readline().strip().split(';')]
-    calib['size'] = calib['size'][0], calib['size'][1]
-
-    # Read the [intrinsics] section
-    f.readline().strip()
-    values = []
-    for i in range(3):
-        values.append([float(value) for value in f.readline().strip().split(';')])
-    calib['intrinsics'] = np.array(values).reshape(3, 3)
-
-    # Read the [distortion] section
-    f.readline().strip()
-    calib['distortion'] = [float(value) for value in f.readline().strip().split(';')]
-
-    return calib
-
-
 def generate_face_feats_file(landmarks_file, info_3D_file, calibration_file, path):
     facefeats_file = open(os.path.join(path, 'Test','face_features.txt'), 'w')
     eyescenter_file = open(os.path.join(path, 'Test','eyes_center.txt'), 'w')
@@ -146,41 +94,8 @@ def generate_face_feats_file(landmarks_file, info_3D_file, calibration_file, pat
     face_roi_size = [250, 250]
     eyes_roi_size = [70, 58]
     for frameIndex in range(siz):
-
-        # Face Bounding box
-        # Get max distance between landmarks
-        max_dist = -1
-        for l1 in landmarks[frameIndex, :, :2]:
-            for l2 in landmarks[frameIndex, :, :2]:
-                if l1 is not l2:
-                    dist = np.linalg.norm(l1 - l2)
-                    if dist > max_dist:
-                        max_dist = dist
-
-        mean_landmarks = np.mean(landmarks[frameIndex, :, :2], axis=0)
-        bb_height = max_dist
-        bb_dims = np.empty([4, 1])
-        bb_dims[0] = mean_landmarks[0] - bb_height / 2  # x
-        bb_dims[1] = mean_landmarks[1] - bb_height / 2  # y
-        bb_dims[2] = bb_dims[3] = bb_height
-
-        mean_face = np.mean(landmarks_CCS[frameIndex], axis=0)
-
-        eyes_center = np.mean(landmarks_CCS[frameIndex, 36:48, :], axis=0)
-
-        leye_center = np.mean(landmarks_CCS[frameIndex, 36:42, :], axis=0)
-        reye_center = np.mean(landmarks_CCS[frameIndex, 42:48, :], axis=0)
-
-        # Openface rotation is given as euler angles, the XYZ convention R = Rx * Ry * Rz, left-handed positive sign
-        R_mat = euler2rot_mat(R[frameIndex,:])
-
-        face_patch_conv, face_patch_warp, face_patch_gaze = get_normalized_data(mean_face, R_mat, face_roi_size,
-                                                                                calib)
-
-        leye_patch_conv, leye_patch_warp, leye_patch_gaze = get_normalized_data(leye_center, R_mat,
-                                                                                eyes_roi_size, calib)
-        reye_patch_conv, reye_patch_warp, reye_patch_gaze = get_normalized_data(reye_center, R_mat,
-                                                                                eyes_roi_size, calib)
+        info3D = compute_face_info(landmarks[frameIndex], landmarks_CCS[frameIndex],
+                                   R[frameIndex], face_roi_size, eyes_roi_size, calib)
 
         # 0 seq_num; 1 bb;
         # 2 face patch warp; 3 face patch conv; 4 face patch gaze;
@@ -188,20 +103,20 @@ def generate_face_feats_file(landmarks_file, info_3D_file, calibration_file, pat
         # 8 reye patch warp; 9 reye patch conv; 10 reye patch gaze;
         # 11 face roi size; 12 eye roi size; 13 - 80 3d landmarks
         facefeats_file.write(str(0) + ';')
-        facefeats_file.write(str(bb_dims[0][0]) + ',' + str(bb_dims[1][0]) + ',' + str(bb_dims[2][0]) + ','
-                             + str(bb_dims[3][0]) + ';')
+        facefeats_file.write(str(info3D['face']['bb'][0]) + ',' + str(info3D['face']['bb'][1]) + ',' +
+                             str(info3D['face']['bb'][2]) + ',' + str(info3D['face']['bb'][3]) + ';')
 
-        write_vector_to_file(facefeats_file, face_patch_warp.reshape(9, 1))
-        write_vector_to_file(facefeats_file, face_patch_conv.reshape(9, 1))
-        write_vector_to_file(facefeats_file, face_patch_gaze.reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['face']['patch_warp'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['face']['patch_conv'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['face']['patch_gaze'].reshape(9, 1))
 
-        write_vector_to_file(facefeats_file, leye_patch_warp.reshape(9, 1))
-        write_vector_to_file(facefeats_file, leye_patch_conv.reshape(9, 1))
-        write_vector_to_file(facefeats_file, leye_patch_gaze.reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['left_eye']['patch_warp'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['left_eye']['patch_conv'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['left_eye']['patch_gaze'].reshape(9, 1))
 
-        write_vector_to_file(facefeats_file, reye_patch_warp.reshape(9, 1))
-        write_vector_to_file(facefeats_file, reye_patch_conv.reshape(9, 1))
-        write_vector_to_file(facefeats_file, reye_patch_gaze.reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['right_eye']['patch_warp'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['right_eye']['patch_conv'].reshape(9, 1))
+        write_vector_to_file(facefeats_file, info3D['right_eye']['patch_gaze'].reshape(9, 1))
 
         facefeats_file.write(str(face_roi_size[0]) + ',' + str(face_roi_size[1]) + ';')
         facefeats_file.write(str(eyes_roi_size[0]) + ',' + str(eyes_roi_size[1]) + ';')
@@ -214,7 +129,8 @@ def generate_face_feats_file(landmarks_file, info_3D_file, calibration_file, pat
                                      + ',' + str(landmarks[frameIndex, j, 2]))
         facefeats_file.write('\n')
 
-        eyescenter_file.write(str(eyes_center[0]) + ',' + str(eyes_center[1]) + ',' + str(eyes_center[2]) + '\n')
+        eyescenter_file.write(str(info3D['face']['eyes_center'][0]) + ',' + str(info3D['face']['eyes_center'][1]) +
+                              ',' + str(info3D['face']['eyes_center'][2]) + '\n')
 
     facefeats_file.close()
     eyescenter_file.close()
@@ -240,7 +156,7 @@ if __name__ == '__main__':
 
     # Treat train split as validation, as we are not going to perform training.
     gt = [[0.0, 0.0, 0.0] for i in range(len(face_features))]  # dummy GT for compatibility
-    validation, _ = train_valtest_split(data, gt, face_features, [])
+    validation, _ =  train_valtest_split(data, gt, face_features, [])
 
     # Get experiment details and methods
     print("Get experiment and define associated model...")

@@ -9,11 +9,15 @@
 # python_version  :3.5.5
 # ==============================================================================
 
-from keras.preprocessing.image import flip_axis, apply_transform, \
-    transform_matrix_offset_center
+from keras import __version__ as version
+if int(version[2]) >= 2:
+    from keras_preprocessing.image import flip_axis, transform_matrix_offset_center#, apply_affine_transform
+else:
+    from keras.preprocessing.image import flip_axis, transform_matrix_offset_center#, #apply_affine_transform
 
 import numpy as np
 import cv2 as cv
+import scipy
 
 
 def apply_transform_matrix(self, img: np.ndarray, transform_matrix):
@@ -26,7 +30,20 @@ def apply_transform_matrix(self, img: np.ndarray, transform_matrix):
     """
     h, w = img.shape[0], img.shape[1]
     transform_matrix = transform_matrix_offset_center(transform_matrix, h, w)
-    img = apply_transform(img, transform_matrix, channel_axis=2, fill_mode=self.fill_mode, cval=self.cval)
+    img = np.rollaxis(img, 2, 0)
+    final_affine_matrix = transform_matrix[:2, :2]
+    final_offset = transform_matrix[:2, 2]
+
+    channel_images = [scipy.ndimage.interpolation.affine_transform(
+        x_channel,
+        final_affine_matrix,
+        final_offset,
+        order=1,
+        mode=self.fill_mode,
+        cval=self.cval) for x_channel in img]
+    img = np.stack(channel_images, axis=0)
+    img = np.rollaxis(img, 0, 2 + 1)
+    # img = apply_affine_transform(img, transform_matrix, channel_axis=2, fill_mode=self.fill_mode, cval=self.cval) # apply_transform
     return img
 
 

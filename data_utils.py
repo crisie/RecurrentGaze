@@ -732,6 +732,30 @@ def read_face_features_file(files: list):
     return face_feats
 
 
+def convert_face_info_to_features(info3D: dict, landmarks, face_roi_size, eyes_roi_size):
+    convert = lambda x: map(float, x)
+    seq_num = 0
+    face_feats = [] # = np.empty((0, 81))
+    face_feats.append(0)
+    face_feats.append(convert(info3D['face']['bb']))
+    face_feats.append(convert(info3D['face']['patch_warp'].reshape(9, 1)))
+    face_feats.append(convert(info3D['face']['patch_conv'].reshape(9, 1)))
+    face_feats.append(convert(info3D['face']['patch_gaze'].reshape(9, 1)))
+    face_feats.append(convert(info3D['left_eye']['patch_warp'].reshape(9, 1)))
+    face_feats.append(convert(info3D['left_eye']['patch_conv'].reshape(9, 1)))
+    face_feats.append(convert(info3D['left_eye']['patch_gaze'].reshape(9, 1)))
+    face_feats.append(convert(info3D['right_eye']['patch_warp'].reshape(9, 1)))
+    face_feats.append(convert(info3D['right_eye']['patch_conv'].reshape(9, 1)))
+    face_feats.append(convert(info3D['right_eye']['patch_gaze'].reshape(9, 1)))
+    face_feats.append(convert(face_roi_size))
+    face_feats.append(convert(eyes_roi_size))
+    for j in list(range(0, len(landmarks))):
+        face_feats.append(convert(landmarks[j]))
+    face_feats.append((info3D['face']['eyes_center']))
+
+    return face_feats
+
+
 def vector2angles(gaze_vector: np.ndarray):
     """
     Transforms a gaze vector into the angles yaw and elevation/pitch.
@@ -870,3 +894,134 @@ def write_vector_to_file(file, vector):
             file.write(str(vector[j, 0]) + ',')
         else:
             file.write(str(vector[j, 0]) + ';')
+
+
+def euler2rot_mat(euler_angles):
+    """
+    Convert euler to rotation matrix, using the XYZ convention R = Rx * Ry * Rz, left-handed positive sign
+    (from Openface)
+    :param euler_angles: euler angles
+    :return: rotation matrix
+    """
+    s1 = np.sin(euler_angles[0])
+    s2 = np.sin(euler_angles[1])
+    s3 = np.sin(euler_angles[2])
+    c1 = np.cos(euler_angles[0])
+    c2 = np.cos(euler_angles[1])
+    c3 = np.cos(euler_angles[2])
+
+    rot_mat = np.empty((3,3), dtype=np.float32)
+    rot_mat[0, 0] = c2 * c3
+    rot_mat[0, 1] = -c2 * s3
+    rot_mat[0, 2] = s2
+    rot_mat[1, 0] = c1 * s3 + c3 * s1 * s2
+    rot_mat[1, 1] = c1 * c3 - s1 * s2 * s3
+    rot_mat[1, 2] = -c2 * s1
+    rot_mat[2, 0] = s1 * s3 - c1 * c3 * s2
+    rot_mat[2, 1] = c3 * s1 + c1 * s2 * s3
+    rot_mat[2, 2] = c1 * c2
+    return np.linalg.inv(rot_mat)
+
+
+def read_calibration_file(file):
+    """
+    Reads the calibration parameters
+    """
+    calib = {}
+    f = open(file, 'r')
+
+    # Read the [resolution] section
+    f.readline().strip()
+    calib['size'] = [int(value) for value in f.readline().strip().split(';')]
+    calib['size'] = calib['size'][0], calib['size'][1]
+
+    # Read the [intrinsics] section
+    f.readline().strip()
+    values = []
+    for i in range(3):
+        values.append([float(value) for value in f.readline().strip().split(';')])
+    calib['intrinsics'] = np.array(values).reshape(3, 3)
+
+    # Read the [distortion] section
+    f.readline().strip()
+    calib['distortion'] = [float(value) for value in f.readline().strip().split(';')]
+
+    return calib
+
+
+def dummy_calib(image_width, image_height):
+    """
+    Creates dummy matrix, like so:
+    calib_matrix['intrinsics'] = [[1.2*image_width, 0.0, image_width/2],
+                              [0.0, 1.2*image_width, image_height/2],
+                              [0.0, 0.0, 1.0]]
+    :param image_width: image width
+    :param image_height: image height
+    :return: dictionary including camera calibration matrix
+    """
+    K = dict()
+    K['intrinsics'] = [[1.2*image_width, 0.0, image_width/2],
+                    [0.0, 1.2*image_width, image_height/2],
+                    [0.0, 0.0, 1.0]]
+    return K
+
+
+def compute_face_info(landmarks2D, landmarks3D, R, face_roi_size, eyes_roi_size, calib):
+
+    max_dist = -1
+    for l1 in landmarks2D[:,:2]:
+        for l2 in landmarks2D[:,:2]:
+            if l1 is not l2:
+                dist = np.linalg.norm(l1 - l2)
+                if dist > max_dist:
+                    max_dist = dist
+
+    mean_landmarks = np.mean(landmarks2D[:,:2], axis=0)
+    bb_height = max_dist
+    bb_dims = np.empty((4,), dtype=np.float32)
+    bb_dims[0] = mean_landmarks[0] - bb_height / 2  # x
+    bb_dims[1] = mean_landmarks[1] - bb_height / 2  # y
+    bb_dims[2] = bb_dims[3] = bb_height
+
+    mean_face = np.mean(landmarks3D, axis=0)
+
+    eyes_center = np.mean(landmarks3D[36:48, :], axis=0)
+
+    leye_center = np.mean(landmarks3D[36:42, :], axis=0)
+    reye_center = np.mean(landmarks3D[42:48, :], axis=0)
+
+    # Openface rotation is given as euler angles, the XYZ convention R = Rx * Ry * Rz, left-handed positive sign
+    R_mat = euler2rot_mat(R[:])
+
+    face_patch_conv, face_patch_warp, face_patch_gaze = get_normalized_data(mean_face, R_mat, face_roi_size,
+                                                                            calib)
+
+    leye_patch_conv, leye_patch_warp, leye_patch_gaze = get_normalized_data(leye_center, R_mat,
+                                                                            eyes_roi_size, calib)
+    reye_patch_conv, reye_patch_warp, reye_patch_gaze = get_normalized_data(reye_center, R_mat,
+                                                                            eyes_roi_size, calib)
+
+    face_info = dict()
+    face_info['rot_mat'] = R_mat
+
+    face_info['face'] = dict()
+    face_info['face']['bb'] = bb_dims
+    face_info['face']['mean_point'] = mean_face
+    face_info['face']['eyes_center'] = eyes_center
+    face_info['face']['patch_conv'] = face_patch_conv
+    face_info['face']['patch_warp'] = face_patch_warp
+    face_info['face']['patch_gaze'] = face_patch_gaze
+
+    face_info['left_eye'] = dict()
+    face_info['left_eye']['eye_center'] = leye_center
+    face_info['left_eye']['patch_conv'] = leye_patch_conv
+    face_info['left_eye']['patch_warp'] = leye_patch_warp
+    face_info['left_eye']['patch_gaze'] = leye_patch_gaze
+
+    face_info['right_eye'] = dict()
+    face_info['right_eye']['eye_center'] = reye_center
+    face_info['right_eye']['patch_conv'] = reye_patch_conv
+    face_info['right_eye']['patch_warp'] = reye_patch_warp
+    face_info['right_eye']['patch_gaze'] = reye_patch_gaze
+
+    return face_info
