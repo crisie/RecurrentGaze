@@ -1,3 +1,7 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/recurrent-cnn-for-3d-gaze-estimation-using/gaze-estimation-on-eyediap-floating-target)](https://paperswithcode.com/sota/gaze-estimation-on-eyediap-floating-target?p=recurrent-cnn-for-3d-gaze-estimation-using)
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/recurrent-cnn-for-3d-gaze-estimation-using/gaze-estimation-on-eyediap-screen-target)](https://paperswithcode.com/sota/gaze-estimation-on-eyediap-screen-target?p=recurrent-cnn-for-3d-gaze-estimation-using)
+
 # RecurrentGaze
 
 This is the implementation of the ["Recurrent CNN for 3D Gaze Estimation using Appearance and Shape Cues"](http://bmvc2018.org/contents/papers/0871.pdf) paper, accepted for BMVC 2018. 
