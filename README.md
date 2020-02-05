@@ -48,15 +48,15 @@ python3 Test.py -exp NFEL5836_2918 -data C:\path\Test\data.txt
 Main script to perform end-to-end gaze estimation. It loads all necessary third-party modules (OpenFace, Bulat et al face alignment, etc), and predicts gaze for all input images.
 
 Dependencies:
-Python=3.6
-tensorflow=1.11
-keras=2.2.4
-keras_vggface=0.5 (instructions here: https://github.com/rcmalli/keras-vggface - but check important note below)
-numpy=1.16.2
-cv2=4.1.0
-ctypes=1.1.0
-skimage=0.15.0
-face_alignment=1.0.1 (instructions here: https://github.com/1adrianb/face-alignment)
+- Python=3.6
+- tensorflow=1.11
+- keras=2.2.4
+- keras_vggface=0.5 (instructions here: https://github.com/rcmalli/keras-vggface - but check important note below)
+- numpy=1.16.2
+- cv2=4.1.0
+- ctypes=1.1.0
+- skimage=0.15.0
+- face_alignment=1.0.1 (instructions here: https://github.com/1adrianb/face-alignment)
 
 The code depends on [OpenFaceWrapper](https://github.com/crisie/OpenFaceWrapper), a shared library to use OpenFace within python applications. Check the github project for install instructions. Right now instructions only for Unix environment. Instructions for Windows environment will follow.
 
