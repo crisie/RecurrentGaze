@@ -60,10 +60,10 @@ Dependencies:
 
 The code depends on [OpenFaceWrapper](https://github.com/crisie/OpenFaceWrapper), a shared library to use OpenFace within python applications. Check the github project for install instructions. Right now instructions only for Unix environment. Instructions for Windows environment will follow.
 
-OpenFace is called within OpenFaceWrapper. 
-
 To install keras_vggface, please use the following command:
+```
 pip install keras_vggface --no-dependencies 
+```
 If you don't add the --no-dependencies flag it will install tensorflow (no gpu version) and other dependencies, which will most likely break your whole environment :). 
 
 
