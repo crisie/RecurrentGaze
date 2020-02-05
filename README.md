@@ -2,6 +2,8 @@
 	
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/recurrent-cnn-for-3d-gaze-estimation-using/gaze-estimation-on-eyediap-screen-target)](https://paperswithcode.com/sota/gaze-estimation-on-eyediap-screen-target?p=recurrent-cnn-for-3d-gaze-estimation-using)
 
+> **_UPDATE:_**  **End-to-end gaze estimation code now available**, including facial landmarks detection and head pose estimation within the pipeline. Check **TestOnline** below.
+
 # RecurrentGaze
 
 This is the implementation of the ["Recurrent CNN for 3D Gaze Estimation using Appearance and Shape Cues"](http://bmvc2018.org/contents/papers/0871.pdf) paper, accepted for BMVC 2018. 
@@ -42,17 +44,39 @@ python3 Test.py -exp NFEL5836_2918 -data C:\path\Test\data.txt
 -cal C:\path\Test\calibration.txt -p C:\path\
 ```
 
+### *TestOnline*:
+Main script to perform end-to-end gaze estimation. It loads all necessary third-party modules (OpenFace, Bulat et al face alignment, etc), and predicts gaze for all input images.
+
+Dependencies:
+Python=3.6
+tensorflow=1.11
+keras=2.2.4
+keras_vggface=0.5 (instructions here: https://github.com/rcmalli/keras-vggface - but check important note below)
+numpy=1.16.2
+cv2=4.1.0
+ctypes=1.1.0
+skimage=0.15.0
+face_alignment=1.0.1 (instructions here: https://github.com/1adrianb/face-alignment)
+
+The code depends on [OpenFaceWrapper](https://github.com/crisie/OpenFaceWrapper), a shared library to use OpenFace within python applications. Check the github project for install instructions. Right now instructions only for Unix environment. Instructions for Windows environment will follow.
+
+OpenFace is called within OpenFaceWrapper. 
+
+To install keras_vggface, please use the following command:
+pip install keras_vggface --no-dependencies 
+If you don't add the --no-dependencies flag it will install tensorflow (no gpu version) and other dependencies, which will most likely break your whole environment :). 
+
+
 ## Requirements
 
 The code was tested using the following versions:
-- Python=3.5.4
-- tensorflow=1.6
-- keras=2.1.5
+- Python=3.6
+- tensorflow=1.11
+- keras=2.2.4
 - [keras_vggface](https://github.com/rcmalli/keras-vggface)=0.5
-- numpy=1.14.2
-- cv2=3.4.0
+- numpy=1.16.2
+- cv2=4.1.0
 
-You may also use the included Dockerfile.
 
 ## EYEDIAP folds distribution
 In the paper, we evaluate the cross-subject 3D gaze estimation task by means of N-fold cross-validation. The different folds are detailed below for each target type.
