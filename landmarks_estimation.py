@@ -14,6 +14,7 @@ class LandmarksEstimation(object):
         else:
             raise RuntimeError("Device type not found")
 
+    # TODO: check if gpu/cpu selector works properly
     @classmethod
-    def get_model(cls, model_type = face_alignment.LandmarksType._3D):
-        return LandmarksEstimation(model_type).landmarks_model
+    def get_model(cls):
+        return LandmarksEstimation.landmarks_model
