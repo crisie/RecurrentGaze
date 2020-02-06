@@ -58,7 +58,7 @@ Dependencies:
 - skimage=0.15.0
 - face_alignment=1.0.1 (instructions here: https://github.com/1adrianb/face-alignment)
 
-The code depends on [OpenFaceWrapper](https://github.com/crisie/OpenFaceWrapper), a shared library to use OpenFace within python applications. Check the github project for install instructions. Right now instructions only for Unix environment. Instructions for Windows environment will follow.
+The code depends on [OpenFaceWrapper](https://github.com/crisie/OpenFaceWrapper), a shared library to use OpenFace within python applications. Check the link for install instructions for Windows and Unix environments.
 
 To install keras_vggface, please use the following command:
 ```
