@@ -45,7 +45,7 @@ class Info3DEstimation(object):
         if os.name == 'nt':
             self.info3D_model = cdll.LoadLibrary(os.path.join(lib_path, "OpenFaceDLL.dll"))
         elif os.name == 'posix':
-            self.info3D_model = cdll.LoadLibrary(os.path.join(lib_path, "OpenFaceDLL.so"))
+            self.info3D_model = cdll.LoadLibrary(os.path.join(lib_path, "libOpenFaceWrapper.so"))
         else:
             RuntimeError("ERROR: Undefined operating system.")
 
